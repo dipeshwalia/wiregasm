@@ -41,7 +41,7 @@ static void wg_log_decode_as(const char *status, const char *table_name, const c
 static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
   if (prefs_get_type(pref) == PREF_DECODE_AS_RANGE) {
     module_t *module = (module_t *)user_data;
-    const char *table_name = prefs_get_dissector_table(pref);
+    const char *table_name = pref->dissector_table;
     if (table_name == NULL) {
       table_name = prefs_get_name(pref);
     }
