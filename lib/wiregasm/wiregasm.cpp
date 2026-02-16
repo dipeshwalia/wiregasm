@@ -24,11 +24,27 @@ static gboolean wg_initialized = FALSE;
 static e_prefs *prefs_p;
 static set<string> wg_decode_as_registrations;
 
+static void wg_log_decode_as(const char *status, const char *table_name, const char *module_name, const char *module_title, const char *range) {
+  char msg[1024];
+  snprintf(
+      msg,
+      sizeof(msg),
+      "decode-as %s table=%s module=%s title=%s range=%s",
+      status != NULL ? status : "",
+      table_name != NULL ? table_name : "",
+      module_name != NULL ? module_name : "",
+      module_title != NULL ? module_title : "",
+      range != NULL ? range : "");
+  on_status(INFO, msg);
+}
+
 static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
   if (prefs_get_type(pref) == PREF_DECODE_AS_RANGE) {
     module_t *module = (module_t *)user_data;
     const char *table_name = prefs_get_name(pref);
     range_t *range = prefs_get_range_value_real(pref, pref_current);
+    const char *module_name = module->name != NULL ? module->name : "";
+    const char *module_title = module->title != NULL ? module->title : "";
 
     if (table_name != NULL && range != NULL) {
       dissector_table_t sub_dissectors = find_dissector_table(table_name);
@@ -54,9 +70,18 @@ static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
           if (wg_decode_as_registrations.find(key) == wg_decode_as_registrations.end()) {
             dissector_add_uint_range(table_name, range, handle);
             wg_decode_as_registrations.insert(key);
+            wg_log_decode_as("registered", table_name, module_name, module_title, range_key.c_str());
+          } else {
+            wg_log_decode_as("skipped-duplicate", table_name, module_name, module_title, range_key.c_str());
           }
+        } else {
+          wg_log_decode_as("no-handle", table_name, module_name, module_title, "");
         }
+      } else {
+        wg_log_decode_as("no-table", table_name, module_name, module_title, "");
       }
+    } else {
+      wg_log_decode_as("missing-table-or-range", table_name != NULL ? table_name : "", module_name, module_title, "");
     }
   }
 
