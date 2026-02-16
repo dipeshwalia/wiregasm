@@ -41,7 +41,10 @@ static void wg_log_decode_as(const char *status, const char *table_name, const c
 static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
   if (prefs_get_type(pref) == PREF_DECODE_AS_RANGE) {
     module_t *module = (module_t *)user_data;
-    const char *table_name = prefs_get_name(pref);
+    const char *table_name = prefs_get_dissector_table(pref);
+    if (table_name == NULL) {
+      table_name = prefs_get_name(pref);
+    }
     range_t *range = prefs_get_range_value_real(pref, pref_current);
     const char *module_name = module->name != NULL ? module->name : "";
     const char *module_title = module->title != NULL ? module->title : "";
@@ -49,8 +52,8 @@ static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
     if (table_name != NULL && range != NULL) {
       dissector_table_t sub_dissectors = find_dissector_table(table_name);
       if (sub_dissectors != NULL) {
-        dissector_handle_t handle = NULL;
-        if (module->name != NULL) {
+        dissector_handle_t handle = module->name != NULL ? find_dissector(module->name) : NULL;
+        if (handle == NULL && module->name != NULL) {
           handle = dissector_table_get_dissector_handle(sub_dissectors, module->name);
         }
         if (handle == NULL && module->title != NULL) {
