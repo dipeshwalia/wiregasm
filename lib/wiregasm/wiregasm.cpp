@@ -4,6 +4,7 @@
 #include <epan/prefs-int.h>
 #include <epan/prefs.h>
 #include <epan/wslua/init_wslua.h>
+#include <set>
 #include <wireshark/ws_version.h>
 #include <wsutil/privileges.h>
 #include <wsutil/report_message.h>
@@ -21,6 +22,7 @@ static const char *UPLOAD_DIR = "/uploads";
 static const char *DEFAULT_PLUGINS_DIR = "/plugins";
 static gboolean wg_initialized = FALSE;
 static e_prefs *prefs_p;
+static set<string> wg_decode_as_registrations;
 
 static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
   if (prefs_get_type(pref) == PREF_DECODE_AS_RANGE) {
@@ -31,10 +33,28 @@ static guint wg_apply_decode_as_pref_cb(pref_t *pref, gpointer user_data) {
     if (table_name != NULL && range != NULL) {
       dissector_table_t sub_dissectors = find_dissector_table(table_name);
       if (sub_dissectors != NULL) {
-        dissector_handle_t handle =
-            dissector_table_get_dissector_handle(sub_dissectors, module->title);
+        dissector_handle_t handle = NULL;
+        if (module->name != NULL) {
+          handle = dissector_table_get_dissector_handle(sub_dissectors, module->name);
+        }
+        if (handle == NULL && module->title != NULL) {
+          handle = dissector_table_get_dissector_handle(sub_dissectors, module->title);
+        }
+
         if (handle != NULL) {
-          dissector_add_uint_range(table_name, range, handle);
+          char *range_str = range_convert_range(NULL, range);
+          string range_key = range_str != NULL ? range_str : "";
+          if (range_str != NULL) {
+            wmem_free(NULL, range_str);
+          }
+
+          string handle_key = module->name != NULL ? module->name : (module->title != NULL ? module->title : "");
+          string key = string(table_name) + "|" + handle_key + "|" + range_key;
+
+          if (wg_decode_as_registrations.find(key) == wg_decode_as_registrations.end()) {
+            dissector_add_uint_range(table_name, range, handle);
+            wg_decode_as_registrations.insert(key);
+          }
         }
       }
     }
@@ -192,6 +212,8 @@ bool wg_init() {
 
   on_status(INFO, "Initializing..");
 
+  wg_decode_as_registrations.clear();
+
   init_report_message("wiregasm", &wg_report_routines);
 
   // cleanup any previous state
@@ -256,13 +278,13 @@ void wg_destroy() {
   epan_cleanup();
   wtap_cleanup();
   free_progdirs();
+  wg_decode_as_registrations.clear();
 
   wg_initialized = FALSE;
 }
 
 void wg_prefs_apply_all() {
   prefs_apply_all();
-  wg_apply_decode_as_defaults();
 }
 
 void wg_set_pref_values(pref_t *pref, PrefData *res) {
