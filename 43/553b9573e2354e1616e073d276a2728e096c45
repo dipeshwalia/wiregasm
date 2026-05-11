@@ -1,0 +1,39 @@
+src/types.ts
+  s_0f0cb5551a09ac::t_25e8db067480c1 247-290,329-337
+  s_0f0cb5551a09ac::t_c94e49f1aca7f2 409-414
+lib/wiregasm/wiregasm.cpp
+  s_0f0cb5551a09ac::t_f78a22a74c8cfa 611-622
+lib/wiregasm/lib.h
+  s_0f0cb5551a09ac::t_be2291c65da8c9 76-78
+src/index.test.ts
+  s_0f0cb5551a09ac::t_1efb612bf7dbf3 171-226
+lib/wiregasm/bindings.cpp
+  s_0f0cb5551a09ac::t_a8b92872066981 34-36,199-249,260-263
+plan.md
+  ai_agent 1-437
+lib/wiregasm/lib.cpp
+  s_0f0cb5551a09ac::t_0865a2bbf91f70 1015-1018,1020,1161-1164,1166,1274-1277,1279
+  s_0f0cb5551a09ac::t_c895a395403350 3-6,1011-1014,1019,1021-1160,1165,1167-1273,1278,1280-1348
+src/index.ts
+  s_0f0cb5551a09ac::t_06aa101523e1ee 239-247,282-283
+  s_0f0cb5551a09ac::t_d4858120bf9ecb 7,13,17,227-238,248-276,278-281,284-289
+  s_0f0cb5551a09ac::t_8b3f2d8239e9c7 100,102,111,147-149,155-169,214-216,277,378-380
+lib/wiregasm/wiregasm.h
+  s_0f0cb5551a09ac::t_470f4f23424651 106-149,320-322
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "43553b9573e2354e1616e073d276a2728e096c45",
+  "prompts": {},
+  "sessions": {
+    "s_0f0cb5551a09ac": {
+      "agent_id": {
+        "tool": "windsurf",
+        "id": "bcf16e9d-9319-4933-9bd6-e25442899741",
+        "model": "GPT-5.3-Codex Medium"
+      },
+      "human_author": "dipesh <dipesh.walia@b-yond.com>"
+    }
+  }
+}
